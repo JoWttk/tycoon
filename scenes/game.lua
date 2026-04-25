@@ -101,6 +101,7 @@ function game.draw()
     love.graphics.setLineWidth(4)
     love.graphics.rectangle("line", 0, 0, w, h - 680)
     love.graphics.rectangle("line", 0, 0, w, h - 60)
+    love.graphics.rectangle("line", 138,660, 0.1, 60)
 
     love.graphics.setLineWidth(12)
     love.graphics.rectangle("line", 0, 0, w, h)

@@ -18,7 +18,7 @@ user.floor = 1
 
 function user.setFloor(floorNum)
     if not unlockedFloors[floorNum] then
-        buy.load("Floor " .. floorNum, floorNum * 10000, floorNum)
+        buy.load("Floor " .. floorNum, floorNum * 2, floorNum)
         return 
     end
     user.floor = floorNum
@@ -57,27 +57,27 @@ function user.load()
 
     floor[1] = button:new(
         "1",
-        127, 675, 50, 30,
+        127 + 30, 675, 50, 30,
         function() user.setFloor(1) end,
         {0.5, 0.5, 0.5}, {1, 1, 1}, 4, nil, true
     )
     
     floor[2] = button:new(
         "2",
-        187, 675, 50, 30,
+        187 + 30, 675, 50, 30,
         function() user.setFloor(2) end,
         {0.3, 0.3, 0.3}, {0.5, 0.5, 0.5}, 4, nil, false
     )
     
     floor[3] = button:new(
         "3",
-        247, 675, 50, 30,
+        247 + 30, 675, 50, 30,
         function() user.setFloor(3) end,
         {0.3, 0.3, 0.3}, {0.5, 0.5, 0.5}, 4, nil, false
     )
 
     Money = label:new("Money: $" .. user.money, 15, 15, {1, 1, 0})
-    Shop = button:new("Shop", 15, 675, 100, 30, function()
+    Shop = button:new("Shop", 20, 675, 100, 30, function()
         windows.shop.load()
     end, {0, 1, 1}, {0,0,0}, 2, {1,1,1})
 end

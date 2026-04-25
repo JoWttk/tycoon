@@ -25,6 +25,7 @@ local itemOrder = { "Initial", "Test" }
 
 local closeButton = nil
 local WINDOW = nil
+local shopLabel = nil
 
 local sw, sh = love.graphics.getDimensions()
 
@@ -104,6 +105,9 @@ function shop.load()
     end
 
     love.graphics.setFont(fonts.large)
+
+    shopLabel = label:new("Shop", wx + ww / 2.35, wy - 10, {1, 1, 1}, 2, {0, 0, 0})
+
     closeButton = button:new("X", wx + ww - 35, wy + 5, 30, 30, function()
         shop.unload()
     end, {1, 0, 0}, {1, 1, 1}, 2, {1, 1, 1})
@@ -121,6 +125,7 @@ function shop.unload()
     end
 
     if closeButton then button.remove(closeButton) closeButton = nil end
+    if shopLabel then label.remove(shopLabel) shopLabel = nil end
 end
 
 return shop

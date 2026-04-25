@@ -4,14 +4,18 @@ local label = {}
 label.list = {}
 label.__index = label
 
-function label:new(text, posX, posY, color)
+function label:new(text, posX, posY, color, textStroke, textStrokeColor)
     local lbl = setmetatable({
         text = text,
         posX = posX,
         posY = posY,
         color = color or {1, 1, 1},
+        textStroke = textStroke or 0,
+        textStrokeColor = textStrokeColor or {0, 0, 0},
         font = love.graphics.getFont()
     }, {__index = label})
+
+    print(lbl.font)
 
     table.insert(label.list, lbl)
     return lbl
@@ -25,6 +29,15 @@ end
 function label.drawAll()
     for _, l in ipairs(label.list) do
         love.graphics.setFont(l.font)
+
+        if l.textStroke > 0 then
+            love.graphics.setColor(l.textStrokeColor)
+            for dx = -l.textStroke, l.textStroke, l.textStroke do
+                for dy = -l.textStroke, l.textStroke, l.textStroke do
+                    love.graphics.print(l.text, l.posX + dx, l.posY + dy)
+                end
+            end
+        end
 
         love.graphics.setColor(l.color)
         love.graphics.print(l.text, l.posX, l.posY)
