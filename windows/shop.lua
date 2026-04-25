@@ -1,3 +1,4 @@
+local save = require("save")
 local user = require("user")
 local button = require("modules.ui.button")
 local window = require("modules.ui.window")
@@ -74,11 +75,13 @@ function shop.addItem(name)
         function()
             if user.getMoney() >= items[name].price then
                 user.takeMoney(items[name].price)
+                user.machines[name] = true
 
                 local machineModule = require("machines." .. name:lower())
                 machineModule.load()
 
                 close()
+                save.save()
                 game_edit(machineModule.machine)
             else
                 local InsufficientMoneyLabel = label:new(

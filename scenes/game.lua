@@ -3,6 +3,7 @@ local task = require("utils.task")
 local user = require("user")
 local button = require("modules.ui.button")
 local shop = require("windows.shop")
+local save = require("save")
 
 local game = {}
 game.editing = false
@@ -26,42 +27,74 @@ function exit_edit()
     game.isEditing = nil
 end
 
+local function buildSaveData()
+    local data = user.getSaveData()
+    data.ownedMachines = data.machines
+    data.machines = {}
+
+    for _, m in ipairs(machine.list) do
+        table.insert(data.machines, {
+            kind = m.kind,
+            name = m.name,
+            posX = m.posX,
+            posY = m.posY,
+            sizeX = m.sizeX,
+            sizeY = m.sizeY,
+            speed = m.speed,
+            running = m.running,
+            floor = m.floor,
+            color = m.color,
+            baseColor = m.baseColor,
+        })
+    end
+
+    return data
+end
+
+local function restoreSavedMachines(savedMachines)
+    if type(savedMachines) ~= "table" then
+        return
+    end
+
+    for _, machineState in ipairs(savedMachines) do
+        local kind = machineState.kind or "default"
+        local ok, machineModule = pcall(require, "machines." .. kind)
+        if ok and machineModule and machineModule.load then
+            machineModule.load(machineState)
+        end
+    end
+end
+
 function game.load()
     love.graphics.setBackgroundColor(0.3, 0.3, 0.3)
     machine.list = {}
 
     user.load()
-    
-    -- Set up floor change callback to move editing machine
+    save.registerWriter(buildSaveData)
+
+    local saveData = save.load()
+    if saveData then
+        user.restoreFromSave(saveData)
+        restoreSavedMachines(saveData.machines)
+    else
+        local defaultMachine = require("machines.default")
+        defaultMachine.load()
+    end
+
+    if not saveData or not saveData.machines or #saveData.machines == 0 then
+        local defaultMachine = require("machines.default")
+        if #machine.list == 0 then
+            defaultMachine.load()
+        end
+    end
+
     user.onFloorChange = function(floorNum)
         if game.editing and game.isEditing then
             game.isEditing.floor = floorNum
         end
     end
 
-    OutroTeste=machine:new(
-        "Outro teste",
-        200, 150, 300, 50, 2,
-        function(self)
-            task.wait(2)
-
-            while true do
-                if self.running then
-                    self:ballTween(1 * self.speed, function()
-                        user.addMoney(100)
-                    end)
-                    task.wait(5)
-                else
-                    task.wait(0.1)
-                end
-            end
-        end,
-        function(self)
-            self:setRunning(not self.running)
-            print(self.running)
-        end,
-        {0, 0, 1}
-    )
+    save.save()
 end
 
 function game.update(dt)

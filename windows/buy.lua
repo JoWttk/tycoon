@@ -1,5 +1,6 @@
 local buy = {}
 
+local save = require("save")
 local button = require("modules.ui.button")
 local window = require("modules.ui.window")
 local label = require("modules.ui.label")
@@ -29,8 +30,8 @@ function buy.load(item, price, floorNum)
         "Buy",
         410, 360, 80, 30,
         function()
-            if user.money >= price then
-                user.money = user.money - price
+            if user.getMoney() >= price then
+                user.takeMoney(price)
                 user.machines[item] = true
 
                 if floorNum then
@@ -38,6 +39,7 @@ function buy.load(item, price, floorNum)
                 end
 
                 buy.unload()
+                save.save()
             else
                 local InsufficientMoneyLabel = label:new(
                     "Not enough money!",

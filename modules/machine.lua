@@ -1,11 +1,12 @@
 local task = require("utils.task")
+local save = require("save")
 local shop = require("windows.shop")
 
 local machine = {}
 machine.list = {}
 machine.__index = machine
 
-function machine:new(name, posX, posY, sizeX, sizeY, speed, work, onClick, color, floor, image)
+function machine:new(name, posX, posY, sizeX, sizeY, speed, work, onClick, color, floor, image, kind)
     if not name then return end
     if not posX then return end
     if not posY then return end
@@ -24,7 +25,8 @@ function machine:new(name, posX, posY, sizeX, sizeY, speed, work, onClick, color
         hovered = false,
         running = false,
         floor = floor or 1,
-        onClick = onClick
+        onClick = onClick,
+        kind = kind or "generic"
     }, machine)
 
     table.insert(machine.list, instance)
@@ -214,10 +216,12 @@ function machine:move(x,y)
 
     self.posX = self.posX + x
     self.posY = self.posY + y
+    save.save()
 end
 
 function machine:setRunning(boolean)
     self.running = boolean
+    save.save()
 end
 
 function machine:getRunning()

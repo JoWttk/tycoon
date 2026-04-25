@@ -1,3 +1,4 @@
+local save = require("save")
 local button = require("modules.ui.button")
 local label = require("modules.ui.label")
 local buy = require("windows.buy")
@@ -33,10 +34,13 @@ function user.setFloor(floorNum)
     if floor[floorNum] then
         floor[floorNum].textColor = {1, 1, 1}
     end
+
+    save.save()
 end
 
 function user.unlockFloor(floorNum)
     unlockedFloors[floorNum] = true
+    save.save()
 end
 
 function user.isFloorUnlocked(floorNum)
@@ -49,6 +53,69 @@ end
 
 local Money
 local Shop
+
+function user.getSaveData()
+    local unlocked = {}
+    for k, v in pairs(unlockedFloors) do
+        unlocked[k] = v
+    end
+
+    local machines = {}
+    for k, v in pairs(user.machines) do
+        machines[k] = v
+    end
+
+    return {
+        money = user.money,
+        floor = user.floor,
+        unlockedFloors = unlocked,
+        machines = machines,
+    }
+end
+
+function user.restoreFromSave(data)
+    if not data then
+        return
+    end
+
+    user.money = data.money or user.money
+    user.floor = data.floor or user.floor
+
+    if type(data.unlockedFloors) == "table" then
+        for k, v in pairs(data.unlockedFloors) do
+            unlockedFloors[k] = v
+        end
+    end
+
+    local machineData = data.ownedMachines
+    if not machineData and type(data.machines) == "table" then
+        local isMap = false
+        for key in pairs(data.machines) do
+            if type(key) ~= "number" then
+                isMap = true
+                break
+            end
+        end
+        if isMap then
+            machineData = data.machines
+        end
+    end
+
+    if type(machineData) == "table" then
+        user.machines = {}
+        for k, v in pairs(machineData) do
+            user.machines[k] = v
+        end
+    end
+
+    if Money then
+        Money:setText("Money: $" .. user.money)
+    end
+
+    if floor[user.floor] then
+        user.setFloor(user.floor)
+    end
+end
 
 function user.load()
     local windows = {
@@ -114,11 +181,13 @@ end
 function user.addMoney(amount)
     user.money = user.money + amount
     Money:setText("Money: $" .. user.money)
+    save.save()
 end
 
 function user.takeMoney(amount)
     user.money = user.money - amount
     Money:setText("Money: $" .. user.money)
+    save.save()
 end
 
 return user
